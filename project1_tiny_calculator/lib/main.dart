@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'calculate_provider.dart';
 
 void main() {
   runApp(const MyApp());
@@ -9,71 +11,25 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      title: 'Tiny Calculator',
-      debugShowCheckedModeBanner: false,
-      home: TinyCalculator(),
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => CalculateProvider()),
+      ],
+      child: const MaterialApp(
+        title: 'Tiny Calculator',
+        debugShowCheckedModeBanner: false,
+        home: TinyCalculator(),
+      ),
     );
   }
 }
 
-class TinyCalculator extends StatefulWidget {
+class TinyCalculator extends StatelessWidget {
   const TinyCalculator({super.key});
 
   @override
-  State<TinyCalculator> createState() => _TinyCalculatorState();
-}
-
-class _TinyCalculatorState extends State<TinyCalculator> {
-  List<String> operations = ['+', '/', '-', '*'];
-  final TextEditingController _firstNumberController = TextEditingController();
-  final TextEditingController _secondNumberController = TextEditingController();
-  String _result = '';
-  int currentIndex = 0;
-
-  void currentValue(isUp) {
-    setState(() {
-      currentIndex = (currentIndex + (isUp ? 1 : -1)) % operations.length;
-      if (currentIndex < 0) currentIndex += operations.length;
-    });
-    calculate();
-  }
-
-  void calculate() {
-    double num1 = double.tryParse(_firstNumberController.text) ?? 0;
-    double num2 = double.tryParse(_secondNumberController.text) ?? 0;
-
-    switch (operations[currentIndex]) {
-      case '+':
-        setState(() {
-          _result = (num1 + num2).toString();
-        });
-        break;
-    }
-    switch (operations[currentIndex]) {
-      case '-':
-        setState(() {
-          _result = (num1 - num2).toString();
-        });
-        break;
-    }
-    switch (operations[currentIndex]) {
-      case '*':
-        setState(() {
-          _result = (num1 * num2).toString();
-        });
-        break;
-    }
-    switch (operations[currentIndex]) {
-      case '/':
-        setState(() {
-          _result = num2 != 0 ? (num1 / num2).toString() : 'Error';
-        });
-    }
-  }
-
-  @override
   Widget build(BuildContext context) {
+    final provider = Provider.of<CalculateProvider>(context);
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(
@@ -102,7 +58,7 @@ class _TinyCalculatorState extends State<TinyCalculator> {
                     child: Center(
                       child: TextField(
                         keyboardType: TextInputType.number,
-                        controller: _firstNumberController,
+                        controller: provider.firstNumberController,
                         style: const TextStyle(
                           fontSize: 20,
                         ),
@@ -111,7 +67,6 @@ class _TinyCalculatorState extends State<TinyCalculator> {
                           hintStyle: TextStyle(fontSize: 20),
                           border: InputBorder.none,
                         ),
-                        onChanged: (value) => calculate(),
                       ),
                     ),
                   ),
@@ -120,7 +75,7 @@ class _TinyCalculatorState extends State<TinyCalculator> {
                     children: [
                       IconButton(
                         onPressed: () {
-                          currentValue(true);
+                          provider.changeOperator(true);
                         },
                         icon: const Icon(Icons.arrow_upward, size: 20),
                       ),
@@ -131,14 +86,15 @@ class _TinyCalculatorState extends State<TinyCalculator> {
                           color: Colors.grey,
                         ),
                         child: Center(
-                            child: Text(
-                          operations[currentIndex],
-                          style: const TextStyle(fontSize: 35),
-                        )),
+                          child: Text(
+                            provider.currentOperation,
+                            style: const TextStyle(fontSize: 35),
+                          ),
+                        ),
                       ),
                       IconButton(
                         onPressed: () {
-                          currentValue(false);
+                          provider.changeOperator(false);
                         },
                         icon: const Icon(Icons.arrow_downward, size: 20),
                       ),
@@ -153,14 +109,13 @@ class _TinyCalculatorState extends State<TinyCalculator> {
                     child: Center(
                       child: TextField(
                         keyboardType: TextInputType.number,
-                        controller: _secondNumberController,
+                        controller: provider.secondNumberController,
                         style: const TextStyle(fontSize: 20),
                         decoration: const InputDecoration(
                           hintText: 'Enter a number',
                           hintStyle: TextStyle(fontSize: 20),
                           border: InputBorder.none,
                         ),
-                        onChanged: (value) => calculate(),
                       ),
                     ),
                   ),
@@ -176,7 +131,7 @@ class _TinyCalculatorState extends State<TinyCalculator> {
               ),
               child: Center(
                 child: Text(
-                  'Result : $_result',
+                  provider.result,
                   style: const TextStyle(fontSize: 20),
                 ),
               ),
