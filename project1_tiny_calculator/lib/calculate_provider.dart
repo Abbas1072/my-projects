@@ -1,47 +1,54 @@
 import 'package:flutter/material.dart';
 
 class CalculateProvider extends ChangeNotifier {
-  List<String> operations = ['+', '/', '-', '*'];
+  final List<String> _operations = ['+', '/', '-', '*'];
   final TextEditingController firstNumberController = TextEditingController();
   final TextEditingController secondNumberController = TextEditingController();
   String result = '';
-  int currentIndex = 0;
+  int _currentIndex = 0;
 
-  String get currentOperation => operations[currentIndex];
+  String get currentOperation => _operations[_currentIndex];
 
   void changeOperator(isUp) {
-    currentIndex = (currentIndex + (isUp ? 1 : -1)) % operations.length;
-    if (currentIndex < 0) currentIndex += operations.length;
-
+    _currentIndex = (_currentIndex + (isUp ? 1 : -1)) % _operations.length;
+    if (_currentIndex < 0) _currentIndex += _operations.length;
     calculate();
-    notifyListeners();
+  }
+
+  void numberProvider() {
+    firstNumberController.addListener(calculate);
+    secondNumberController.addListener(calculate);
   }
 
   void calculate() {
     double num1 = double.tryParse(firstNumberController.text) ?? 0;
     double num2 = double.tryParse(secondNumberController.text) ?? 0;
 
-    switch (operations[currentIndex]) {
+    switch (_operations[_currentIndex]) {
       case '+':
         result = (num1 + num2).toString();
         break;
-    }
-    switch (operations[currentIndex]) {
+
       case '-':
         result = (num1 - num2).toString();
 
         break;
-    }
-    switch (operations[currentIndex]) {
+
       case '*':
         result = (num1 * num2).toString();
 
         break;
-    }
-    switch (operations[currentIndex]) {
+
       case '/':
         result = num2 != 0 ? (num1 / num2).toString() : 'Error';
     }
     notifyListeners();
+  }
+
+  @override
+  void dispose() {
+    firstNumberController.dispose();
+    secondNumberController.dispose();
+    super.dispose();
   }
 }

@@ -67,7 +67,6 @@ class TinyCalculator extends StatelessWidget {
                           hintStyle: TextStyle(fontSize: 20),
                           border: InputBorder.none,
                         ),
-                        onChanged: (value) => provider.calculate(),
                       ),
                     ),
                   ),
@@ -117,7 +116,6 @@ class TinyCalculator extends StatelessWidget {
                           hintStyle: TextStyle(fontSize: 20),
                           border: InputBorder.none,
                         ),
-                        onChanged: (value) => provider.calculate(),
                       ),
                     ),
                   ),
@@ -133,7 +131,7 @@ class TinyCalculator extends StatelessWidget {
               ),
               child: Center(
                 child: Text(
-                  'Result : ${provider.result}',
+                  provider.result,
                   style: const TextStyle(fontSize: 20),
                 ),
               ),
